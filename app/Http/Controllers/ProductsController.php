@@ -53,7 +53,7 @@ class ProductsController extends Controller
 			$product->save();
 			return redirect('/admin/view-product')->with('flash_message_success', 'Product has been added successfully');
 		}
-
+		
         $categories = Category::where(['parent_id' => 0])->get();
 
 		$categories_drop_down = "<option value='' selected disabled>Select</option>";
@@ -72,7 +72,21 @@ class ProductsController extends Controller
 	}
 	
 	public function editProducts(Request $request, $id = null){
-		return view('admin.products.edit_products')->with(compact('products'));
+		$productDetails = Product::where(['id'=>$id])->first();
+
+
+        $categories = Category::where(['parent_id' => 0])->get();
+
+		$categories_drop_down = "<option value='' selected disabled>Select</option>";
+		foreach($categories as $cat){
+			$categories_drop_down .= "<option value='".$cat->id."'>".$cat->name."</option>";
+			$sub_categories = Category::where(['parent_id' => $cat->id])->get();
+			foreach($sub_categories as $sub_cat){
+				$categories_drop_down .= "<option value='".$sub_cat->id."'>&nbsp;&nbsp;--&nbsp;".$sub_cat->name."</option>";	
+			}	
+		}
+
+		return view('admin.products.edit_products')->with(compact('productDetails','categories_drop_down'));
 	}
 		
 	public function viewProducts(Request $request){
