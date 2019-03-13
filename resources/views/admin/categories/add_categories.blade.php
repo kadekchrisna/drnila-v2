@@ -2,7 +2,7 @@
 @section('content')
 <div id="content">
     <div id="content-header">
-      <div id="breadcrumb"> <a href="index.html" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#">Categories</a> <a href="#" class="current">Add Category</a> </div>
+      <div id="breadcrumb"> <a href="{{ url('/admin/dashboard')}}" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="{{ url('/admin/view-category')}}">Categories</a> <a href="#" class="current">Add Category</a> </div>
       <h1>Categories</h1>
     </div>
     <div class="container-fluid"><hr>
@@ -41,6 +41,12 @@
                   <label class="control-label">URL</label>
                   <div class="controls">
                     <input type="text" name="url" id="url">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">Enable</label>
+                  <div class="controls">
+                    <input type="checkbox" name="status" id="status" value="1">
                   </div>
                 </div>
                 <div class="form-actions">

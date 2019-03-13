@@ -19,9 +19,18 @@ Route::match(['get', 'post'], '/admin', 'AdminController@login' );
 
 Auth::routes();
 
-
+Route::get('/', 'IndexController@index');
 
 Route::get('/logout', 'AdminController@logout');
+
+//List
+Route::get('/products/{id}', 'ProductsController@products');
+
+//Detail
+Route::get('/product/{id}', 'ProductsController@product');
+
+//Get Product Attribute Price 
+Route::get('/get-product-price', 'ProductsController@getProductPrice');
 
 Route::group(['middleware' => ['auth']], function(){
 	Route::get('/admin/dashboard', 'AdminController@dashboard');

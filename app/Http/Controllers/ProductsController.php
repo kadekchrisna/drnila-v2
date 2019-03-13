@@ -32,6 +32,10 @@ class ProductsController extends Controller
 				$product->description = $data['description'];
 			}else{
 				$product->description = '';	
+			}if(!empty($data['care'])){
+				$product->care = $data['care'];
+			}else{
+				$product->care = '';	
 			}
 			$product->price = $data['price'];
 
@@ -99,8 +103,17 @@ class ProductsController extends Controller
 				}
 			}else {
 				$fileName = $data['current_image'];
+            }
+            if(!empty($data['description'])){
+				$description = $data['description'];
+			}else{
+				$product->description = '';	
+			}if(!empty($data['care'])){
+				$care = $data['care'];
+			}else{
+				$product->care = '';	
 			}
-			Product::where(['id'=>$id])->update(['category_id'=>$data['category_id'],'product_name'=>$data['product_name'],'product_code'=>$data['product_code'],'product_color'=>$data['product_color'],'product_color'=>$data['product_color'],'description'=>$data['description'],'price'=>$data['price'],'image'=>$fileName]);
+			Product::where(['id'=>$id])->update(['category_id'=>$data['category_id'],'product_name'=>$data['product_name'],'product_code'=>$data['product_code'],'product_color'=>$data['product_color'],'product_color'=>$data['product_color'],'description'=>$description,'care'=>$care,'price'=>$data['price'],'image'=>$fileName]);
 			return redirect()->back()->with('flash_message_success', 'Product has been updated successfully');
 		}
 		$productDetails = Product::where(['id'=>$id])->first();
@@ -140,6 +153,28 @@ class ProductsController extends Controller
 	
 	}
 	public function deleteProductImage($id = null){
+        
+        // Get Product Image
+		$productImage = Product::where('id',$id)->first();
+
+		// Get Product Image Paths
+		$large_image_path = 'img/backend_img/products/large/';
+		$medium_image_path = 'img/backend_img/products/medium/';
+		$small_image_path = 'img/backend_img/products/small/';
+		// Delete Large Image if not exists in Folder
+        if(file_exists($large_image_path.$productImage->image)){
+            unlink($large_image_path.$productImage->image);
+        }
+
+        // Delete Medium Image if not exists in Folder
+        if(file_exists($medium_image_path.$productImage->image)){
+            unlink($medium_image_path.$productImage->image);
+        }
+
+        // Delete Small Image if not exists in Folder
+        if(file_exists($small_image_path.$productImage->image)){
+            unlink($small_image_path.$productImage->image);
+        }
 
 		Product::where(['id'=>$id])->update(['image'=>'']);
 		return redirect()->back()->with('flash_message_success', 'Product Image has been deleted successfully');
@@ -175,5 +210,57 @@ class ProductsController extends Controller
         ProductsAttribute::where(['id'=>$id])->delete();
         return redirect()->back()->with('flash_message_success', 'Product Attributes has been deleted successfully');
 
+    }
+
+    public function products($url = null){
+        // Show 404 Page if Category does not exists
+    	$categoryCount = Category::where(['url'=>$url,'status'=>1])->count();
+    	if($categoryCount==0){
+    		abort(404);
+    	}
+
+        $categories = Category::with('categories')->where(['parent_id' => 0])->get();
+        $categoriesDetails = Category::where(['url'=>$url])->first();
+        if($categoriesDetails->parent_id==0){
+    		$subCategories = Category::where(['parent_id'=>$categoriesDetails->id])->get();
+    		
+    		foreach($subCategories as $subcat){
+    			$cat_ids[] = $subcat->id;
+            }
+            $cat_ids[] = $categoriesDetails->id;
+            $productsAll = Product::whereIn('category_id', $cat_ids)->get();
+            //$productsAll = json_decode(json_encode($productsAll));
+            //echo "<pre>"; print_r($productsAll); 
+    	}else{
+    		$productsAll = Product::where(['category_id'=>$categoriesDetails->id])->get();	
+    	}
+        
+        return view('products.listing')->with(compact('categoriesDetails','categories','productsAll'));
+    }
+
+    public function product($id = null){
+        // Show 404 Page if Product is disabled
+        $productCount = Product::where(['id'=>$id])->count();
+        if($productCount==0){
+            abort(404);
+        }
+
+        //Get Peoduct
+        $productDetails = Product::with('attributes')->where('id',$id)->first();
+        //$productDetails = json_decode(json_encode($productDetails));
+        //echo "<pre>"; print_r($productDetails); die;
+
+        $categories = Category::with('categories')->where(['parent_id' => 0])->get();
+
+        return view('products.detail')->with(compact('productDetails','categories'));
+    }
+
+    public function getProductPrice(Request $request){
+        $data = $request->all();
+        //echo "<pre>"; print_r($data);die; 
+        $proArr = explode("-",$data['id']);
+        //echo $proArr[0]; echo $proArr[1]; die;
+        $proArr = ProductsAttribute::where(['product_id' => $proArr[0], 'size' => $proArr[1]])->first();
+        echo $proArr->price;
     }
 }
