@@ -11,6 +11,7 @@ use App\Category;
 use App\ProductsAttribute;
 use App\ProductsImage;
 use App\Product;
+use DB; 
 
 class ProductsController extends Controller
 {
@@ -38,6 +39,11 @@ class ProductsController extends Controller
 			}else{
 				$product->care = '';	
 			}
+            if(empty($data['status'])){
+                $status='0';
+            }else{
+                $status='1';
+            }
 			$product->price = $data['price'];
 
 			//Upload Image
@@ -85,6 +91,11 @@ class ProductsController extends Controller
 			$data = $request->all();
 			//echo "<pre>"; print_r($data); die;
 
+            if(empty($data['status'])){
+                $status='0';
+            }else{
+                $status='1';
+            }
 			//Upload Image
 			if ($request->hasFile('image')) {
 				$image_temp = Input::file('image');
@@ -105,16 +116,17 @@ class ProductsController extends Controller
 			}else {
 				$fileName = $data['current_image'];
             }
-            if(!empty($data['description'])){
-				$description = $data['description'];
-			}else{
-				$product->description = '';	
-			}if(!empty($data['care'])){
-				$care = $data['care'];
-			}else{
-				$product->care = '';	
-			}
-			Product::where(['id'=>$id])->update(['category_id'=>$data['category_id'],'product_name'=>$data['product_name'],'product_code'=>$data['product_code'],'product_color'=>$data['product_color'],'product_color'=>$data['product_color'],'description'=>$description,'care'=>$care,'price'=>$data['price'],'image'=>$fileName]);
+            
+            if(empty($data['description'])){
+            	$data['description'] = '';
+            }
+
+            if(empty($data['care'])){
+                $data['care'] = '';
+            }
+
+			Product::where(['id'=>$id])->update(['status'=>$status,'category_id'=>$data['category_id'],'product_name'=>$data['product_name'],
+				'product_code'=>$data['product_code'],'product_color'=>$data['product_color'],'description'=>$data['description'],'care'=>$data['care'],'price'=>$data['price'],'image'=>$fileName]);
 			return redirect()->back()->with('flash_message_success', 'Product has been updated successfully');
 		}
 		$productDetails = Product::where(['id'=>$id])->first();
@@ -254,11 +266,11 @@ class ProductsController extends Controller
     			$cat_ids[] = $subcat->id;
             }
             $cat_ids[] = $categoriesDetails->id;
-            $productsAll = Product::whereIn('category_id', $cat_ids)->get();
+            $productsAll = Product::whereIn('category_id', $cat_ids)->where('status','1')->get();
             //$productsAll = json_decode(json_encode($productsAll));
             //echo "<pre>"; print_r($productsAll); 
     	}else{
-    		$productsAll = Product::where(['category_id'=>$categoriesDetails->id])->get();	
+    		$productsAll = Product::where(['category_id'=>$categoryDetails->id])->where('status','1')->get();	
     	}
         
         return view('products.listing')->with(compact('categoriesDetails','categories','productsAll'));
@@ -266,7 +278,7 @@ class ProductsController extends Controller
 
     public function product($id = null){
         // Show 404 Page if Product is disabled
-        $productCount = Product::where(['id'=>$id])->count();
+        $productCount = Product::where(['id'=>$id,'status'=>1])->count();
         if($productCount==0){
             abort(404);
         }
@@ -276,12 +288,14 @@ class ProductsController extends Controller
         //$productDetails = json_decode(json_encode($productDetails));
         //echo "<pre>"; print_r($productDetails); die;
 
+        $relatedProducts = Product::where('id','!=',$id)->where(['category_id' => $productDetails->category_id])->get();
+
         $productAltImages = ProductsImage::where('product_id',$id)->get();
         $categories = Category::with('categories')->where(['parent_id' => 0])->get();
 
         $total_stock = ProductsAttribute::where('product_id',$id)->sum('stock');
 
-        return view('products.detail')->with(compact('productDetails','categories','productAltImages', 'total_stock'));
+        return view('products.detail')->with(compact('productDetails','categories','productAltImages', 'total_stock','relatedProducts'));
     }
 
     public function getProductPrice(Request $request){
@@ -360,5 +374,68 @@ class ProductsController extends Controller
         ProductsImage::where(['id'=>$id])->delete();
 
         return redirect()->back()->with('flash_message_success', 'Product alternate mage has been deleted successfully');
+    }
+
+    public function addToCart(Request $request){
+
+        $data = $request->all();
+        if(empty($data['user_email'])){
+            $data['user_email'] = '';    
+        }
+
+        $session_id = Session::get('session_id');
+        if(!isset($session_id)){
+            $session_id = str_random(40);
+            Session::put('session_id',$session_id);
+        }
+
+        
+        $countProducts = DB::table('cart')->where(['product_id' => $data['product_id'],'product_color' => $data['product_color'],'size' => $data['size'],'session_id' => $session_id])->count();
+        if($countProducts>0){
+            return redirect()->back()->with('flash_message_error','Product already exist in Cart!');
+        }
+
+
+        $sizeIDArr = explode('-',$data['size']);
+        $product_size = $sizeIDArr[1];
+
+        $getSKU = ProductsAttribute::select('sku')->where(['product_id' => $data['product_id'], 'size' => $product_size])->first();
+        
+        //echo "<pre>"; print_r($data); die;
+        DB::table('cart')
+        ->insert(['product_id' => $data['product_id'],'product_name' => $data['product_name'],
+            'product_code' => $getSKU['sku'],'product_color' => $data['product_color'],
+            'price' => $data['price'],'size' => $product_size,'quantity' => $data['quantity'],'user_email' => $data['user_email'],'session_id' => $session_id]);
+
+        return redirect('cart')->with('flash_message_success','Product has been added in Cart!');
+    }
+
+    public function cart(){
+             
+        $session_id = Session::get('session_id');
+        $userCart = DB::table('cart')->where(['session_id' => $session_id])->get();
+        foreach($userCart as $key => $product){
+            $productDetails = Product::where('id',$product->product_id)->first();
+            $userCart[$key]->image = $productDetails->image;
+        }
+        return view('products.cart')->with(compact('userCart'));
+    }
+
+
+    public function updateCartQuantity($id=null,$quantity=null){
+        $getProductSKU = DB::table('cart')->select('product_code','quantity')->where('id',$id)->first();
+        $getProductStock = ProductsAttribute::where('sku',$getProductSKU->product_code)->first();
+        $updated_quantity = $getProductSKU->quantity+$quantity;
+        if($getProductStock->stock>=$updated_quantity){
+            DB::table('cart')->where('id',$id)->increment('quantity',$quantity); 
+            return redirect('cart')->with('flash_message_success','Product Quantity has been updated in Cart!');   
+        }else{
+            return redirect('cart')->with('flash_message_error','Required Product Quantity is not available!');    
+        }
+    }
+
+    public function deleteCartProduct($id=null){
+        DB::table('cart')->where('id',$id)->delete();
+        return redirect('cart')->with('flash_message_success','Product has been deleted in Cart!');
     }
 }
