@@ -7,50 +7,17 @@
                 <div class="col-sm-12">
                     <div id="slider-carousel" class="carousel slide" data-ride="carousel">
                         <ol class="carousel-indicators">
-                            <li data-target="#slider-carousel" data-slide-to="0" class="active"></li>
-                            <li data-target="#slider-carousel" data-slide-to="1"></li>
-                            <li data-target="#slider-carousel" data-slide-to="2"></li>
+                            @foreach($banners as $key => $banner)
+                                <li data-target="#slider-carousel" data-slide-to="0" @if($key==0) class="active" @endif></li>
+                            @endforeach
                         </ol>
                         
                         <div class="carousel-inner">
-                            <div class="item active">
-                                <div class="col-sm-6">
-                                    <h1><span>E</span>-SHOPPER</h1>
-                                    <h2>Free E-Commerce Template</h2>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-                                    <button type="button" class="btn btn-default get">Get it now</button>
-                                </div>
-                                <div class="col-sm-6">
-                                    <img src="{{ asset('img/frontend_img/home/girl1.jpg') }}" class="girl img-responsive" alt="" />
-                                    <img src="{{ asset('img/frontend_img/home/pricing.png') }}"  class="pricing" alt="" />
-                                </div>
+                            @foreach($banners as $key => $banner)
+                            <div class="item @if($key==0) active @endif">
+                                <a href="{{ $banner->link }}" title="Banner 1"><img src="img/frontend_img/banners/{{ $banner->image }}" ></a>
                             </div>
-                            <div class="item">
-                                <div class="col-sm-6">
-                                    <h1><span>E</span>-SHOPPER</h1>
-                                    <h2>100% Responsive Design</h2>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-                                    <button type="button" class="btn btn-default get">Get it now</button>
-                                </div>
-                                <div class="col-sm-6">
-                                    <img src="{{ asset('img/frontend_img/home/girl2.jpg') }}" class="girl img-responsive" alt="" />
-                                    <img src="{{ asset('img/frontend_img/home/pricing.jpg') }}"  class="pricing" alt="" />
-                                </div>
-                            </div>
-                            
-                            <div class="item">
-                                <div class="col-sm-6">
-                                    <h1><span>E</span>-SHOPPER</h1>
-                                    <h2>Free Ecommerce Template</h2>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-                                    <button type="button" class="btn btn-default get">Get it now</button>
-                                </div>
-                                <div class="col-sm-6">
-                                    <img src="{{ asset('img/frontend_img/home/girl3.jpg') }}" class="girl img-responsive" alt="" />
-                                    <img src="{{ asset('img/frontend_img/home/pricing.jpg') }}" class="pricing" alt="" />
-                                </div>
-                            </div>
-                            
+                            @endforeach
                         </div>
                         
                         <a href="#slider-carousel" class="left control-carousel hidden-xs" data-slide="prev">
@@ -65,7 +32,6 @@
             </div>
         </div>
     </section><!--/slider-->
-
     <section>
         <div class="container">
             <div class="row">

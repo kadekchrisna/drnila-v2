@@ -56,7 +56,7 @@ Route::group(['middleware' => ['auth']], function(){
 	Route::get('/admin/view-product', 'ProductsController@viewProducts');
 	Route::get('/admin/delete-product-image/{id}', 'ProductsController@deleteProductImage');
     Route::get('/admin/delete-product/{id}', 'ProductsController@deleteProduct');
-    
+
     //Product Attribute
     Route::match(['get', 'post'], '/admin/add-attributes/{id}','ProductsController@addAttributes');
     Route::match(['get', 'post'], '/admin/edit-attributes/{id}','ProductsController@editAttributes');
@@ -65,6 +65,20 @@ Route::group(['middleware' => ['auth']], function(){
     //Product Alt Images
     Route::match(['get', 'post'], '/admin/add-images/{id}','ProductsController@addImages');
     Route::get('/admin/delete-alt-image/{id}','ProductsController@deleteProductAltImage');
+
+	//Rent Routes
+	Route::match(['get', 'post'], '/admin/add-rent','ProductsController@addProduct');
+	Route::match(['get', 'post'], '/admin/edit-rent/{id}','ProductsController@editProducts');
+	Route::get('/admin/view-rent', 'ProductsController@viewProducts');
+	Route::get('/admin/delete-rent-image/{id}', 'ProductsController@deleteProductImage');
+    Route::get('/admin/delete-rent/{id}', 'ProductsController@deleteProduct');
+
+	// Admin Banners Routes
+	Route::match(['get','post'],'/admin/add-banner','BannersController@addBanner');
+	Route::match(['get','post'],'/admin/edit-banner/{id}','BannersController@editBanner');
+	Route::get('/admin/view-banners','BannersController@viewBanners');
+    Route::get('/admin/delete-banner/{id}','BannersController@deleteBanner');
+    Route::get('/admin/delete-banner-image/{id}', 'BannersController@deleteBannerImage');
 });
 
 Route::get('/home', 'HomeController@index')->name('home');
