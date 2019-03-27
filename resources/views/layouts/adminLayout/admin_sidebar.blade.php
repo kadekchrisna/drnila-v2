@@ -15,7 +15,7 @@
         <li><a href="{{url('/admin/view-product')}}">View Product</a></li>
       </ul>
     </li>
-    <li class="submenu"> <a href="#"><i class="icon icon-plane"></i> <span>Rent</span></a>
+    <li class="submenu"> <a href="#"><i class="icon icon-time"></i> <span>Rent</span></a>
       <ul>
         <li><a href="{{url('/admin/add-rent')}}">Add Rent</a></li>
         <li><a href="{{url('/admin/view-rent')}}">View Rent</a></li>

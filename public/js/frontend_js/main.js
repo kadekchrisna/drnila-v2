@@ -40,7 +40,7 @@ $(document).ready(function(){
             url:'/get-product-price',
             data:{id:id},
             success:function(resp){
-                // alert("error");
+                //`alert("error");
                 var arr = resp.split('#');
 				$("#getPrice").html("USD "+arr[0]);
 				$("#price").val(arr[0]);

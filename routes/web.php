@@ -67,11 +67,11 @@ Route::group(['middleware' => ['auth']], function(){
     Route::get('/admin/delete-alt-image/{id}','ProductsController@deleteProductAltImage');
 
 	//Rent Routes
-	Route::match(['get', 'post'], '/admin/add-rent','ProductsController@addProduct');
-	Route::match(['get', 'post'], '/admin/edit-rent/{id}','ProductsController@editProducts');
-	Route::get('/admin/view-rent', 'ProductsController@viewProducts');
-	Route::get('/admin/delete-rent-image/{id}', 'ProductsController@deleteProductImage');
-    Route::get('/admin/delete-rent/{id}', 'ProductsController@deleteProduct');
+	Route::match(['get', 'post'], '/admin/add-rent','RentsController@addProductRent');
+	Route::match(['get', 'post'], '/admin/edit-rent/{id}','RentsController@editProductsRent');
+	Route::get('/admin/view-rent', 'RentsController@viewProductsRent');
+	Route::get('/admin/delete-rent-image/{id}', 'RentsController@deleteProductRentImage');
+    Route::get('/admin/delete-rent/{id}', 'RentsController@deleteProductRent');
 
 	// Admin Banners Routes
 	Route::match(['get','post'],'/admin/add-banner','BannersController@addBanner');
