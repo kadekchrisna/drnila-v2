@@ -34,7 +34,7 @@
             <div class="row">
                 <div class="col-sm-4">
                     <div class="logo pull-left">
-                        <a href="index.html"><img src="{{ asset('img/frontend_img/home/logo.png ') }}" alt="" /></a>
+                        <a href="/"><img src="{{ asset('img/frontend_img/home/logo.png ') }}" alt="" /></a>
                     </div>
                 </div>
                 <div class="col-sm-8">
@@ -75,11 +75,6 @@
                             </li> 
                             <li><a href="#">Blog</a></li> 
                         </ul>
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="search_box pull-right">
-                        <input type="text" placeholder="Search"/>
                     </div>
                 </div>
             </div>

@@ -141,16 +141,15 @@ class RentsController extends Controller
 				if ($image_temp->isValid()) {
 						$extension = $image_temp->getClientOriginalExtension();
 
-						$fileName = rand(111,99999).'.'.$extension;
-						$large_image_path = 'img/backend_img/products/large/'.$fileName;
-						$medium_image_path = 'img/backend_img/products/medium/'.$fileName;  
-						$small_image_path = 'img/backend_img/products/small/'.$fileName;  
+						$fileNamePilot = rand(111,99999).'.'.$extension;
+						$large_image_path = 'img/backend_img/products/large/'.$fileNamePilot;
+						$medium_image_path = 'img/backend_img/products/medium/'.$fileNamePilot;  
+						$small_image_path = 'img/backend_img/products/small/'.$fileNamePilot;  
 
 						Image::make($image_temp)->save($large_image_path);
 						Image::make($image_temp)->resize(600, 600)->save($medium_image_path);
 						Image::make($image_temp)->resize(300, 300)->save($small_image_path);
  
-						$product->image_pilot = $fileName; 
 				}
 			}else {
 				$fileNamePilot = $data['current_image_pilot'];
@@ -165,7 +164,7 @@ class RentsController extends Controller
             }
 
 			Rent::where(['id'=>$id])->update(['status'=>$status,'category_id'=>$data['category_id'],'product_name'=>$data['product_name'],
-				'product_code'=>$data['product_code'],'product_color'=>$data['product_color'],'description'=>$data['description'],'care'=>$data['care'],'price'=>$data['price'],'image'=>$fileName]);
+				'product_code'=>$data['product_code'],'product_color'=>$data['product_color'],'description'=>$data['description'],'care'=>$data['care'],'price'=>$data['price'],'image'=>$fileName,'image_pilot'=>$fileNamePilot]);
 			return redirect()->back()->with('flash_message_success', 'Product has been updated successfully');
 		}
 		$productDetails = Rent::where(['id'=>$id])->first();
